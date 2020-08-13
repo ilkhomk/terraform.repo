@@ -1,11 +1,14 @@
 resource "aws_instance" "inet" {
-  ami           = "ami-02354e95b39ca8dec"
+  ami           = "ami-067f5c3d5a99edc80"
   instance_type = "t2.large"
   associate_public_ip_address = "true"
-  key_name      = "${aws_key_pair.ec2key.task-key}"
+  key_name      = "${aws_key_pair.ec2key.key_name}"
   user_data     = "${file("ec2data.sh")}"
   availability_zone = "us-west-2a"
-
+  vpc_security_group_ids = ["${aws_security_group.allow_web.id}"]
+  tags = {
+  Name = "Web"
+    }
 }
 resource "aws_key_pair" "ec2key" {
   key_name   = "task-key"
@@ -46,7 +49,7 @@ resource "aws_security_group" "allow_web" {
 
 }
 resource "aws_ebs_volume" "disk" {
-    availability_zone = "us-east-1a"
+    availability_zone = "us-west-2a"
     size = 100
 }
 
@@ -61,4 +64,20 @@ resource "aws_route53_record" "www" {
   type    = "A"
   ttl     = "30"
   records = ["${aws_instance.inet.public_ip}"]
+}
+
+output "ID" {
+  value       = "${aws_instance.inet.id}"
+}
+
+output "KEY" {
+  value       = "${aws_instance.inet.key_name}"
+}
+
+output "SEC GR" {
+  value       = "${aws_security_group.allow_web.name}"
+}
+
+output "ROUTE53" {
+  value       = "${aws_route53_record.www.name}"
 }
