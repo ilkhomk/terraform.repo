@@ -1,10 +1,9 @@
 resource "aws_instance" "inet" {
-  ami           = "ami-0873b46c45c11058d"
-  instance_type = "t2.large"
+  ami           = "${data.aws_ami.centos.id}"
+  instance_type = "t2.micro"
   associate_public_ip_address = "true"
   key_name      = "${aws_key_pair.ec2key.key_name}"
-  user_data     = "${file("ec2data.sh")}"
-  availability_zone = "us-west-2a"
+  availability_zone = "us-east-1a"
   vpc_security_group_ids = ["${aws_security_group.allow_web.id}"]
   tags = {
   Name = "Web"
@@ -49,23 +48,6 @@ resource "aws_security_group" "allow_web" {
   }
 
 }
-resource "aws_ebs_volume" "disk" {
-    availability_zone = "us-west-2a"
-    size = 100
-}
-
-resource "aws_volume_attachment" "ebs_disk" {
-    device_name = "/dev/sdh"
-    volume_id = "${aws_ebs_volume.disk.id}"
-    instance_id = "${aws_instance.inet.id}"
-}
-resource "aws_route53_record" "www" {
-  zone_id = "Z1023849MNLCJKQ28NTZ"
-  name    = "www.ilkhom-k.com"
-  type    = "A"
-  ttl     = "60"
-  records = ["${aws_instance.inet.public_ip}"]
-}
 
 output "ID" {
   value       = "${aws_instance.inet.id}"
@@ -77,8 +59,4 @@ output "KEY" {
 
 output "SEC GR" {
   value       = "${aws_security_group.allow_web.name}"
-}
-
-output "ROUTE53" {
-  value       = "${aws_route53_record.www.name}"
 }
