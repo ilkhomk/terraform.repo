@@ -1,0 +1,29 @@
+{
+    "builders": [{
+      "type": "amazon-ebs",
+      "region": "us-east-1",
+      "source_ami": "ami-02eac2c0129f6376b",
+      "instance_type": "t2.micro",
+      "ssh_username": "centos",
+      "ami_name": "nagiosxi {{timestamp}}"
+    }],
+    "provisioners": [{
+      "type": "file",
+         "source": "r1soft.repo",
+          "destination": "/tmp/"
+           },
+        {
+      "type": "shell",
+         "inline":[
+            "sudo yum update -y",
+            "sudo yum install curl -y",
+            "sudo curl https://assets.nagios.com/downloads/nagiosxi/install.sh | sudo sh"
+           ]
+         },
+      {
+      "type": "shell",
+          "script": "script.sh"
+          }
+       ]
+}
+  
